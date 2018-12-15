@@ -1,0 +1,172 @@
+# Windows 10 64bit Guest Installation
+
+# Install tasks
+* Install from *en_windows_10_enterprise_x64_dvd_6851151.iso*
+* Execute Windows Update - beware that this step can take hours :(
+
+# Disable Windows Defender
+* Open the Registry (Run -> Regedit)
+* Navigate to `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender`
+* New -> DWORD (32-bit) Value -> DisableAntiSpyware = 1
+
+# Remove OneDrive
+* Control Panel -> Programs -> Uninstall a Program or Settings -> Apps > Apps & features
+* Uninstall Microsoft OneDrive
+* Open the Registry (Run -> Regedit)
+* Navigate to `HKEY_CLASSES_ROOT\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}`
+* `System.IsPinnedToNameSpaceTree` set to 0
+* Navigate to `HKEY_CLASSES_ROOT\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}`
+* `System.IsPinnedToNameSpaceTree` set to 0
+
+# Install Office 2016 and Visio 2016
+* Run *PortableWinCDEmu-4.0.exe* to emulate a CD for the ISO files
+* Install Office 2016 from *SW_DVD5_Office_Professional_Plus_2016_64Bit_English_MLF_X20-42432.ISO*
+* Instal Visio 2016 from *SW_DVD5_Visio_Pro_2016_64Bit_English_MLF_X20-42764.ISO*
+* Run Windows Update to grab the latest updates for Office 2016
+
+# Disable Windows Update
+* Open the Group Policy Editor (*gpedit.msc*)
+* Computer Configuration -> Administrative Templates -> Windows Components -> Windows Update
+* Double-click Configure Automatic Updates.
+* Select Disabled in Configured Automatic Updates on the left, and click Apply and OK to disable the Windows automatic update feature.
+
+# Install and run Activator
+* Run *KMSAuto Net.exe* to activate Windows and Office
+
+# Reclaim residual space used by Windows Update and Installers
+* Run *services.msc*
+* Stop *Windows Update*
+* Delete all from *C:\Windows\SoftwareDistribution\Download*
+* Delete all from *C:\Windows\SoftwareDistribution\DeliveryOptimization*
+* Delete all from *%TEMP%*
+* Uninstall unwanted apps and widgets
+* Disk Drive -> Properties -> Disk Cleanup -> Cleanup System Files
+
+# Tweak performance
+* Control Panel -> System -> Advanced system settings -> Performance -> Visual Effects- -> Adjust for best performance
+* Set a 1GB Page Files
+* Change the computer name
+
+# Disable Quick Access history view
+* [Disable Quick Access history view](https://www.laptopmag.com/articles/disable-quick-access-file-explorer)
+
+### Configure Chrome
+[Configure Chrome](https://sites.google.com/site/easylinuxtipsproject/chrome)
+* Start chrome with `google-chrome --password-store=basic`
+
+* Settings -> Appearance
+ * Show Home button
+ * Always show the bookmarks bar
+ * Use system title bar and borders
+
+
+* Settings -> Advanced -> Languages
+ * Offer to translate pages that aren't in a language you read
+
+
+* Settings -> Advanced -> Privacy
+
+ Ensure that only these three useful features are enabled:
+ * Use a web service to help resolve navigation errors
+ * Protect you and your device from dangerous sites
+ * Send a "Do Not Track" request with your browsing traffic
+
+
+* Settings -> Advanced -> Content settings -> Cookies
+ * Keep local data only until you quit your browser
+
+### Configure Firefox
+[Configure Firefox](https://sites.google.com/site/easylinuxtipsproject/firefox)
+
+* Preferences -> Privacy & Security
+ * History -> Firefox will: Use custom settings for history
+ * Clear history when Firefox closes
+ * Click the button Settings to the right of "Clear history when Firefox closes" and tick everything, except for Site Preferences
+
+* Cookies and Site Data:
+ * Accept cookies -> Keep until: Firefox is closed
+ * Item Address Bar: remove the tick for: Browsing history
+ * Item Tracking protection: leave those settings at their defaults
+
+Type `about:config` in the URL bar of Firefox:
+
+* `browser.cache.disk.smart_size.enabled` set to false.
+* `browser.cache.disk.capacity` set to 102400.
+* `dom.webnotifications.enabled` set to false.
+* `browser.urlbar.maxRichResults` set to 0
+* `browser.sessionstore.interval` set to 15000000
+
+# Make a portable Oracle JDK
+* Download the [Oracle JDK](https://www.oracle.com/technetwork/java/javase/downloads/index.html)
+* Use 7zip to extract the `tools.zip` from the `.rsrc\1033\JAVA_CAB10\111` directory of the downloaded `*.exe` file
+* Inside the extracted directory, execute
+
+`for /R %f in (.\*.pack) do @"%cd%\bin\unpack200" -r -v -l "" "%f" "%~pf%~nf.jar`
+
+# Configure a portable MySql
+* Download [MySQL Community Server Windows x64 ZIP Archive](https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.17-winx64.zip)
+* Extract the downloaded MySQL Server Archive
+* Create a directory for MySQL's database's data files (e.g. `C:/Devel/common/database/mysql-5.7.17/data`)
+* Create a directory for MySQL's database logging (e.g. `C:/Devel/common/database/mysql-5.7.17/logs`)
+* Create MySQL options file (e.g. `C:/Devel/common/database/mysql-5.7.17/my-default.ini`)
+* Update the config file as follows:
+
+```bash
+# For advice on how to change settings please see
+# http://dev.mysql.com/doc/refman/5.7/en/server-configuration-defaults.html
+# *** DO NOT EDIT THIS FILE. It's a template which will be copied to the
+# *** default location during install, and will be replaced if you
+# *** upgrade to a newer version of MySQL.
+
+[mysqld]
+
+# Remove leading # and set to the amount of RAM for the most important data
+# cache in MySQL. Start at 70% of total RAM for dedicated server, else 10%.
+# innodb_buffer_pool_size = 128M
+
+# Remove leading # to turn on a very important data integrity option: logging
+# changes to the binary log between backups.
+# log_bin
+
+# These are commonly set, remove the # and set as required.
+# basedir = .....
+# datadir = .....
+# port = .....
+# server_id = .....
+
+
+# Remove leading # to set options mainly useful for reporting servers.
+# The server defaults are faster for transactions and fast SELECTs.
+# Adjust sizes as needed, experiment to find the optimal values.
+# join_buffer_size = 128M
+# sort_buffer_size = 2M
+# read_rnd_buffer_size = 2M
+
+sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES
+
+# set basedir to your installation path
+basedir="C:/Devel/common/database/mysql-5.7.17"
+
+# set datadir to the location of your data directory
+datadir="C:/Devel/common/database/mysql-5.7.17/data"
+
+# The port number to use when listening for TCP/IP connections. On Unix and Unix-like systems, the port number must be
+# 1024 or higher unless the server is started by the root system user.
+port = "3306"
+
+# Log errors and startup messages to this file.
+log-error="C:/Devel/common/database/mysql-5.7.17/logs/error_log.err"
+
+[mysqladmin]
+
+user = "root"
+port = "3306"
+```
+
+* Initialize the database
+
+`C:\Devel\common\database\mysql-5.7.17\bin\mysqld.exe --defaults-file=C:\Devel\common\database\mysql-5.7.17\my-default.ini --initialize-insecure --console`
+
+* Start the database
+
+`"%MYSQL_5_HOME%\bin\mysqld.exe" --defaults-file="%MYSQL_5_HOME%\my-default.ini" --log_syslog=0 --console`
