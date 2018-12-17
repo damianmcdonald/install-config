@@ -31,10 +31,19 @@ https://sites.google.com/site/easylinuxtipsproject/ssd
 sudo apt-get update
 sudo apt-get upgrade
 sudo apt dist-upgrade
-sudo apt-get install firejail git rclone gpodder youtube-dl imagemagick
+sudo apt-get install firejail git rclone gpodder youtube-dl imagemagick puddletag nodejs npm python3-pip
 sudo add-apt-repository ppa:nilarimogard/webupd8
 sudo apt-get update && sudo apt-get install youtube-dlg
 ```
+
+### Install AWS tools
+```bash
+pip3 install awscli --no-cache --upgrade --user
+pip3 install localstack --no-cache --user
+pip3 install amazon_kclpy --no-cache --user
+pip3 install awscli-local --no-cache --user
+```
+
 ### Add proprietary drivers
 * Go to System -> Driver Manager
 * Select proprietary drivers
@@ -320,3 +329,22 @@ export GPODDER_HOME=/opt/storage/gpodder
  *Windows* Guest
  * Log on to Windows Guest
  * Start -> Control Panel -> VMware Tools
+
+### Create a Live Linux USB with persistent file system
+```bash
+sudo add-apt-repository ppa:mkusb/ppa
+sudo apt install mkusb
+sudo mkusb /path/to/ubuntu_image.iso p
+```
+
+* Choose the e) option for the GUI
+* Follow defaults and allocate the desired percentage for allocation to the file system
+
+### Create and restore a USB disk image
+* make the disk image
+
+`sudo dd if=/dev/sd* conv=sync,noerror status=progress | gzip -c > /path/to/my-disk.image.gz`
+
+* restore disk image
+
+`sudo gunzip -c IMAGE.HERE-GZ | dd of=/dev/OUTPUT/DEVICE-HERE`
