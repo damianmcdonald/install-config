@@ -203,9 +203,31 @@ Configure the Oracle JDK as default.
 sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk-11.0.1/bin/java 0
 sudo update-alternatives --config java
 ```
-### Install VMWare Workstation
-* Install VMware-Workstation-Full-15.0.2-10952284.x86_64.bundle
+### Install VMWare Workstation (15 on Ubuntu 18.04 with UEFI Secure Boot)
+* Install VMware-Workstation-Full-15.1.0-13591040.x86_64.bundle
 * Enter serial `UC7W0-6WY91-H890Y-NQQ79-M60D8`
+* `sudo vmware-modconfig --console --install-all`
+* There will be issues with monitor and net, this is expected and ok
+* The networking modules need to be registered with secure boot (UEFI)
+* Generate a key
+* `openssl req -new -x509 -newkey rsa:2048 -keyout VMWARE15.priv -outform DER -out VMWARE15.der -nodes -days 36500 -subj "/CN=VMWARE/"`
+* Install the drivers modules
+* `sudo /usr/src/linux-headers-$(uname -r)/scripts/sign-file sha256 ./VMWARE15.priv ./VMWARE15.der $(modinfo -n vmmon)`
+* `sudo /usr/src/linux-headers-$(uname -r)/scripts/sign-file sha256 ./VMWARE15.priv ./VMWARE15.der $(modinfo -n vmnet)``
+* Note that the above commands do not give any feedback
+* Check the modules installed
+* `tail $(modinfo -n vmmon) | grep "Module signature appended"`
+* You should get Binary file (standard input) matches
+* Have key signed on reboot
+* `sudo mokutil --import VMWARE15.der`
+* This will ask you for a password, enter some new password a bit long like **1515vmware**. Reenter same password
+* Reboot the maachine. During the reboot process you should be presented with a menu with blue screen background, you have to make your way to enroll the key and enter the password you just created, this happens only once, then continue to boot / reboot.
+* To test the driver / module installed correctly enter the command
+* `mokutil --test-key VMWARE15.der`
+* You should get *VMWARE15.der is already enrolled* and that means VMWare should be working.
+* https://askubuntu.com/questions/1096052/vmware-15-error-on-ubuntu-18-4-could-not-open-dev-vmmon-no-such-file-or-dire
+* https://askubuntu.com/questions/805152/is-it-possible-to-delete-an-enrolled-key-using-mokutil-without-the-original-der
+
 
 ### Install Citrix Receiver for Linux
 * Download [Citrix Receiver for Linux Full Package](https://www.citrix.es/downloads/citrix-receiver/linux/receiver-for-linux-latest.html)
